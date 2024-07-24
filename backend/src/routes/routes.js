@@ -7,7 +7,7 @@ import UsuarioController from "../controllers/UsuarioController.js";
 
 const routes = new Router();
 
-routes.get("/users", UsuarioController.index);
+routes.get("/user/:id", UsuarioController.show);
 routes.post("/user", multerPostUser.single("image"), UsuarioController.store);
 
 routes.use(errorRoutes);

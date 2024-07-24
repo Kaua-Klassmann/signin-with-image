@@ -1,14 +1,34 @@
 import Yup from "yup";
 import fs from "fs";
 import path from "path";
+import FormData from "form-data";
 
 import Usuario from "../models/Usuario.js";
 
 class UsuarioController {
-  async index(req, res) {
-    const usuario = await Usuario.findAll();
+  async show(req, res) {
+    const { id } = req.params;
 
-    return res.json(usuario);
+    const user = await Usuario.findByPk(id, {
+      attributes: ["email"],
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "User not found" });
+    }
+
+    const imagePath = path.join(
+      "public/images",
+      user.email.split("@")[0] + ".jpeg"
+    );
+
+    const form = new FormData();
+
+    form.append("email", user.email);
+    form.append("image", fs.createReadStream(imagePath));
+
+    res.set(form.getHeaders());
+    return form.pipe(res);
   }
 
   async store(req, res) {
@@ -46,9 +66,7 @@ class UsuarioController {
       return res.status(400).json({ error: "User already exists" });
     }
 
-    const newFileName = `${req.body.email.split("@")[0]}.${
-      req.file.mimetype.split("/")[1]
-    }`;
+    const newFileName = `${req.body.email.split("@")[0]}.jpeg`;
     const newPath = path.join(req.file.destination, newFileName);
 
     fs.rename(req.file.path, newPath, () => {
