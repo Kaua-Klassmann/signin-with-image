@@ -22,6 +22,10 @@ class UsuarioController {
       user.email.split("@")[0] + ".jpeg"
     );
 
+    if (!fs.existsSync(imagePath)) {
+      return res.status(400).json({ error: "Image not found" });
+    }
+
     const form = new FormData();
 
     form.append("email", user.email);
